@@ -1,3 +1,7 @@
-# source /swshare/ROOT/root_v5.34.18_slc6_amd64/bin/thisroot.sh
-export PATH=/afs/psi.ch/sys/psi.x86_64_slp6/Programming/psi-python27/2.4.1/bin:$PATH
-which python /afs/psi.ch/sys/psi.x86_64_slp6/Programming/psi-python27/2.4.1/bin/python
+
+export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch/
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+source /swshare/psit3/etc/profile.d/cms_ui_env.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_84/x86_64-slc6-gcc49-opt/setup.sh
+export PATH=/swshare/anaconda/bin:$PATH
+which python /swshare/anaconda/bin/python

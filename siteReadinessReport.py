@@ -47,17 +47,44 @@ def main():
 
 def siteReadinessReport():
 
+    subjectline_Phoenix, fullreport_Phoenix = siteReadinessReport_function(
+        startAnchor = r'<a name="T2_CH_CSCS"></a>',
+        # endAnchor   = r'<a name="T2_CH_CSCS_HPC"></a>',
+        endAnchor   = r'<a name="T2_CN_Beijing"></a>',
+        )    
+
+    # subjectline_HPC, fullreport_HPC = siteReadinessReport_function(
+    #     startAnchor = r'<a name="T2_CH_CSCS_HPC"></a>',
+    #     endAnchor   = r'<a name="T2_CN_Beijing"></a>',
+    #     )
+
+    fullreport_Phoenix = fullreport_Phoenix[ : fullreport_Phoenix.index( 'For more details, see:' )-1 ]
+
+    # subjectline = 'SiteReadiness: {0} (Ph.), {1} (Cray)'.format( subjectline_Phoenix, subjectline_HPC )
+    # fullreport = 'PHOENIX | ' + fullreport_Phoenix + '\nCRAY | ' + fullreport_HPC
+
+    return subjectline_Phoenix, fullreport_Phoenix
+
+
+
+def siteReadinessReport_function(
+    startAnchor = r'<a name="T2_CH_CSCS"></a>',
+    endAnchor   = r'<a name="T2_CH_CSCS_HPC"></a>',
+    ):
+
     # ======================================
     # Get relevant part of site readiness html
     
-    startAnchor = r'<a name="T2_CH_CSCS"></a>'
-    endAnchor   = r'<a name="T2_CH_CSCS_HPC"></a>'
+    # startAnchor = r'<a name="T2_CH_CSCS"></a>'
+    # endAnchor   = r'<a name="T2_CH_CSCS_HPC"></a>'
     SiteReadinessHtml = 'https://cms-site-readiness.web.cern.ch/cms-site-readiness/SiteReadiness/HTML/SiteReadinessReport.html#T2_CH_CSCS'
     # Does not work on python 2.6...
     fullHtml = subprocess.check_output( 'curl -s ' + SiteReadinessHtml , shell=True )
     iStartAnchor = fullHtml.index(startAnchor)
     iEndAnchor = fullHtml.index(endAnchor)
     html = fullHtml[iStartAnchor:iEndAnchor]
+
+    reportCreationTime = re.search( r'Report\smade\son\s[\d\-]+\s[\d\:]+\s\(UTC\)', html ).group()
 
 
     # ======================================
@@ -98,6 +125,7 @@ def siteReadinessReport():
         'Active T2 links to T1s',
         ]
 
+    newMetrics = []
     metricDict = {}
     for metric in metrics:
 
@@ -116,8 +144,12 @@ def siteReadinessReport():
 
         if metricValues[0].startswith(metric): metricValues.pop(0)
 
+        metric = metric.replace('T2 links from T1s','T1-->T2').replace('T2 links to T1s','T2-->T1')
         metricDict[metric] = metricValues
+        newMetrics.append(metric)
 
+    # Slightly changed names so it's shorter
+    metrics = newMetrics
 
 
     # ======================================
@@ -125,7 +157,6 @@ def siteReadinessReport():
 
     datePat = r'<div id="date">(.*?)</div>'
     dates = re.findall( datePat, html )
-
 
 
     # ======================================
@@ -175,6 +206,7 @@ def siteReadinessReport():
 
     fullreport = 'Full report of the last {0} days:\n'.format( useLastN )
     fullreport += '\n'.join(lines)
+    fullreport += '\n\n' + reportCreationTime
     fullreport += '\n\nFor more details, see:'
     fullreport += '\n' + SiteReadinessHtml
 
@@ -186,16 +218,14 @@ def siteReadinessReport():
             mostRecentStat = stat
             break
 
-    subjectline = 'Report '
-    subjectline += mostRecentStat['date'] + ': '
-
-    shortstats = []
-    shortstats.append( 'LS={0}'.format( mostRecentStat['LifeStatus'].replace('&check;','V') ) )
-    shortstats.append( 'SR={0}'.format( mostRecentStat['Site Readiness'] ) )
-    shortstats.append( 'SAM={0}'.format( mostRecentStat['SAM Availability'] ) )
-    shortstats.append( 'HC={0}'.format( mostRecentStat['HammerCloud'] ) )
-    subjectline += ', '.join(shortstats)
-    subjectline += ' ({0})'.format(datestr)
+    # subjectline = ''
+    # shortstats = []
+    # # shortstats.append( 'LifeStatus: {0}'.format( mostRecentStat['LifeStatus'].replace('&check;','V') ) )
+    # shortstats.append( 'SiteReadiness: {0}'.format( mostRecentStat['Site Readiness'] ) )
+    # # shortstats.append( 'SAM={0}'.format( mostRecentStat['SAM Availability'] ) )
+    # # shortstats.append( 'HC={0}'.format( mostRecentStat['HammerCloud'] ) )
+    # subjectline += ', '.join(shortstats)
+    subjectline = '{0}'.format( mostRecentStat['Site Readiness'] )
 
     return subjectline, fullreport
 

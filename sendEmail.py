@@ -42,28 +42,38 @@ def sendEmail(
     body = '<font face="Courier New, Courier, monospace"><pre>' + body + '</pre></font>'
     body = body.replace( '\n', '<br>' )
 
-    # Create a text/plain message
-    msg = MIMEText( body, 'html' )
-
-    msg['Subject'] = subject
-    msg['From']    = 'tklijnsm.helper@gmail.com'
-    msg['To']      = 'tklijnsm@gmail.com'
 
 
-    if not test:
-        server = smtplib.SMTP('smtp.gmail.com:587')
-        server.ehlo()
-        server.starttls()
-        server.login(
-            'tklijnsm.helper@gmail.com',
-            'iwanttohelp'
-            )
-        server.sendmail( msg['From'], msg['To'], msg.as_string() )
-        server.quit()
+    for emailReceiver in [
+        'tklijnsm@gmail.com',
+        'derek.feichtinger@psi.ch',
+        'vstampf@student.ethz.ch'
+        ]:
 
-    else:
-        print 'TEST MODE: Sending the following email:'
-        print msg
+        # Create a text/plain message
+        msg = MIMEText( body, 'html' )
+
+        msg['Subject'] = subject
+        msg['From']    = 'tklijnsm.helper@gmail.com'
+        # msg['To']      = 'tklijnsm@gmail.com'
+        msg['To']      = emailReceiver
+
+
+        if not test:
+
+            server = smtplib.SMTP('smtp.gmail.com:587')
+            server.ehlo()
+            server.starttls()
+            server.login(
+                'tklijnsm.helper@gmail.com',
+                'the password'
+                )
+            server.sendmail( msg['From'], msg['To'], msg.as_string() )
+            server.quit()
+
+        else:
+            print 'TEST MODE: Sending the following email:'
+            print msg
 
 
 
